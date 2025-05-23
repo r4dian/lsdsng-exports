@@ -4,12 +4,15 @@
   "description": "Convert your LSDSNG to HTML/JSON/MIDI",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "build": "npx rollup src/main.js > main.out.js"
   },
-  "dependencies": {
-    "express": "^4.16.4",
-    "formidable": "^1.2.1"
+  "devDependencies": {
+    "@babel/preset-env": "^7.27.2",
+    "@rollup/plugin-babel": "^6.0.4"
   },
+  "browserslist": [
+    "> 0.25%, not dead"
+  ],
   "engines": {
     "node": "8.x"
   },

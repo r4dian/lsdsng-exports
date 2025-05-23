@@ -1,270 +1,30 @@
-// lots of info on unpacking and sav structure taken from LSDJ wiki
-// https://littlesounddj.fandom.com/wiki/.sav_structure
-// https://littlesounddj.fandom.com/wiki/File_Management_Structure
-const BLOCKSIZE = 0x200;
-const DEFAULT_INSTRUMENT = [
-  0xa8,
-  0x0,
-  0x0,
-  0xff,
-  0x0,
-  0x0,
-  0x3,
-  0x0,
-  0x0,
-  0xd0,
-  0x0,
-  0x0,
-  0x0,
-  0xf3,
-  0x0,
-  0x0
-];
-const DEFAULT_WAV = [
-  0x8e,
-  0xcd,
-  0xcc,
-  0xbb,
-  0xaa,
-  0xa9,
-  0x99,
-  0x88,
-  0x87,
-  0x76,
-  0x66,
-  0x55,
-  0x54,
-  0x43,
-  0x32,
-  0x31
-];
-const NOTES = [
-  "---",
-  "C 3",
-  "C#3",
-  "D 3",
-  "D#3",
-  "E 3",
-  "F 3",
-  "F#3",
-  "G 3",
-  "G#3",
-  "A 3",
-  "A#3",
-  "B 3",
-  "C 4",
-  "C#4",
-  "D 4",
-  "D#4",
-  "E 4",
-  "F 4",
-  "F#4",
-  "G 4",
-  "G#4",
-  "A 4",
-  "A#4",
-  "B 4",
-  "C 5",
-  "C#5",
-  "D 5",
-  "D#5",
-  "E 5",
-  "F 5",
-  "F#5",
-  "G 5",
-  "G#5",
-  "A 5",
-  "A#5",
-  "B 5",
-  "C 6",
-  "C#6",
-  "D 6",
-  "D#6",
-  "E 6",
-  "F 6",
-  "F#6",
-  "G 6",
-  "G#6",
-  "A 6",
-  "A#6",
-  "B 6",
-  "C 7",
-  "C#7",
-  "D 7",
-  "D#7",
-  "E 7",
-  "F 7",
-  "F#7",
-  "G 7",
-  "G#7",
-  "A 7",
-  "A#7",
-  "B 7",
-  "C 8",
-  "C#8",
-  "D 8",
-  "D#8",
-  "E 8",
-  "F 8",
-  "F#8",
-  "G 8",
-  "G#8",
-  "A 8",
-  "A#8",
-  "B 8",
-  "C 9",
-  "C#9",
-  "D 9",
-  "D#9",
-  "E 9",
-  "F 9",
-  "F#9",
-  "G 9",
-  "G#9",
-  "A 9",
-  "A#9",
-  "B 9",
-  "C A",
-  "C#A",
-  "D A",
-  "D#A",
-  "E A",
-  "F A",
-  "F#A",
-  "G A",
-  "G#A",
-  "A A",
-  "A#A",
-  "B A",
-  "C B",
-  "C#B",
-  "D B",
-  "D#B",
-  "E B",
-  "F B",
-  "F#B",
-  "G B",
-  "G#B",
-  "A B",
-  "A#B",
-  "B B"
-];
-const TRANSPOSE = [
-  "B 3",
-  "C 3",
-  "C#3",
-  "D 3",
-  "D#3",
-  "E 3",
-  "F 3",
-  "F#3",
-  "G 3",
-  "G#3",
-  "A 3",
-  "A#3"
-];
-const CHANS = ["pu1", "pu2", "wav", "noi"];
-const MIDIOFFSET = 35;
-const MIDIHEADER = [
-  0x4d,
-  0x54,
-  0x68,
-  0x64,
-  0x00,
-  0x00,
-  0x00,
-  0x06,
-  0x00,
-  0x00,
-  0x00,
-  0x01,
-  0x01,
-  0xe0,
-  0x4d,
-  0x54,
-  0x72,
-  0x6b
-];
-
 // base object for all data
-const lsdsng = {
-  name: [],
-  ver: 0,
-  version: 0,
-  initflags: [],
-  tempo: 0,
-  tunesetting: 0,
-  filechanged: 0,
-  clock: {
-    hours: 0,
-    minutes: 0,
-    total: {
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      checksum: 0
-    }
-  },
-  options: {
-    keydelay: 0,
-    keyrepeat: 0,
-    font: 0,
-    syncsetting: 0,
-    colorset: 0,
-    clone: 0,
-    powersave: 0,
-    prelisten: 0,
-    wavesynthoverwrite: []
-  },
-  songchains: {
-    pu1: [],
-    pu2: [],
-    wav: [],
-    noi: []
-  },
-  chains: {
-    phrases: [],
-    transpose: []
-  },
-  phrases: {
-    allocation: [],
-    notes: [],
-    fx: [],
-    fxval: [],
-    instruments: []
-  },
-  tables: {
-    allocation: [],
-    envelope: [],
-    transpose: [],
-    fx: [],
-    fxval: [],
-    fx2: [],
-    fx2val: []
-  },
-  instruments: {
-    allocation: [],
-    names: [],
-    params: [],
-    speech: {
-      words: [],
-      wordnames: []
-    },
-    softsynthparams: [],
-    waveframes: []
-  },
-  bookmarks: [],
-  grooves: []
-};
-exports.unpack = function(data) {
-  let lsdsngObj = JSON.parse(JSON.stringify(lsdsng));
+import {
+    BLOCKSIZE,
+    CHANS,
+    DEFAULT_INSTRUMENT,
+    DEFAULT_WAV,
+    LSDSNG_HTML_STYLES,
+    MIDIOFFSET,
+    NOTES,
+    TRANSPOSE
+} from "./constants";
+import {lsdsngFactory} from "./lsdjsngFile";
+
+/**
+ * Unpack data into song object.
+ * @param {Uint8Array} data
+ * @returns {LSDJSngFile}
+ */
+export const unpack = (data) => {
+  let lsdsngObj = lsdsngFactory();
   let decompressedData = [];
   let bank = 0;
   // set name (first 8 bytes)
   let name = data.slice(0, 8);
   lsdsngObj.name = [...name];
   // set ver (9th byte)
-  lsdsngObj.ver = data.readUInt8(8);
+  lsdsngObj.ver = data[8];
   // slice the buffer for unpacking based on LSDSNG spec noted at the top
   data = data.slice(9);
   let i = 0;
@@ -272,10 +32,10 @@ exports.unpack = function(data) {
   // pretty hacky, just start unpacking until we get to 32768 bytes which might support lsdprj files?
   while (decompressedData.length < 32768) {
     // if you reach a special byte
-    if (data[i] == 0xc0) {
+    if (data[i] === 0xc0) {
       // if you reach a special byte twice in a row
       // add that byte to the decompressed data
-      if (data[i + 1] == 0xc0) {
+      if (data[i + 1] === 0xc0) {
         decompressedData.push(0xc0);
         i += 2;
       }
@@ -288,16 +48,16 @@ exports.unpack = function(data) {
       }
     }
     // if you reach a special byte
-    else if (data[i] == 0xe0) {
+    else if (data[i] === 0xe0) {
       // if you reach a special byte twice in a row
       // add that byte to the decompressed data
-      if (data[i + 1] == 0xe0) {
+      if (data[i + 1] === 0xe0) {
         decompressedData.push(0xe0);
         i += 2;
       }
       // otherwise if following byte == 0xf1,
       // add DEFAULT_INSTRUMENT to decompressedData, data[i+2] times
-      else if (data[i + 1] == 0xf1) {
+      else if (data[i + 1] === 0xf1) {
         for (let j = 0; j < data[i + 2]; j++) {
           decompressedData.push(...DEFAULT_INSTRUMENT);
         }
@@ -305,7 +65,7 @@ exports.unpack = function(data) {
       }
       // otherwise if following byte == 0xf0,
       // add DEFAULT_WAV to decompressedData, data[i+2] times
-      else if (data[i + 1] == 0xf0) {
+      else if (data[i + 1] === 0xf0) {
         for (let j = 0; j < data[i + 2]; j++) {
           decompressedData.push(...DEFAULT_WAV);
         }
@@ -313,7 +73,7 @@ exports.unpack = function(data) {
       }
       // otherwise if following byte == 0xff
       // end of file reached, break
-      else if (data[i + 1] == 0xff) {
+      else if (data[i + 1] === 0xff) {
         break;
       }
       // else, increment bank and increment i to the next bank
@@ -502,16 +262,27 @@ exports.unpack = function(data) {
   return lsdsngObj;
 };
 
-// creates the html
-exports.makeHTML = function(data) {
+/**
+ * Makes HTML file out of the data object.
+ *
+ * @param {LSDJSngFile} data
+ * @returns {string}
+ */
+export const makeHTML = (data) => {
   const EFFECTS = getVersionEffects(data);
-  let outputHTML = "";
   let chain;
   // create the top of the html file
-  outputHTML += `<html><head><link rel="stylesheet" href="styles.css" type="text/css"></head><body>`;
-  outputHTML += `<div class="divTableBody">`;
-  outputHTML += `<div class="dt">`;
-  outputHTML += `<div class="dr"><div class="dc">row</div><div class="dc">pu1</div><div class="dc">pu2</div><div class="dc">wav</div><div class="dc">noi</div></div>\n`;
+  let outputHTML =
+      `<html lang=""><head><style>${LSDSNG_HTML_STYLES}</style></head><body>` +
+      `<div class="divTableBody">` +
+      `<div class="dt">` +
+      `<div class="dr"><div class="dc">row</div>`+
+       `<div class="dc">pu1</div>` +
+       `<div class="dc">pu2</div>` +
+       `<div class="dc">wav</div>` +
+       `<div class="dc">noi</div></div>
+`;
+
   for (let i = 0; i < 256; i++) {
     outputHTML += `<div class="dr" onclick="expand('r${i}')"><div class="dc">${String(
       "0" + i.toString(16)
@@ -520,7 +291,7 @@ exports.makeHTML = function(data) {
       .slice(-2)}</div>\n`;
     for (let j = 0; j < CHANS.length; j++) {
       chain = data.songchains[CHANS[j]][i];
-      if (chain == 255) {
+      if (chain === 255) {
         chain = "--";
       }
       outputHTML += `<div class="dc1">${String("0" + chain.toString(16))
@@ -533,12 +304,11 @@ exports.makeHTML = function(data) {
     for (let j = 0; j < CHANS.length; j++) {
       outputHTML += `<div class="dc3">\n`;
       chain = data.songchains[CHANS[j]][i];
-      if (chain == 255) {
+      if (chain === 255) {
         chain = "--";
       }
       for (let k = 0; k < 16; k++) {
-        if (chain == "--") {
-          // outputHTML += `<div class="divTableCell">${t}</div>`;
+        if (chain === "--") {
         } else {
           let phrase = data.chains.phrases[chain][k];
           let transpose = data.chains.transpose[chain][k];
@@ -546,21 +316,19 @@ exports.makeHTML = function(data) {
           if (transpose > 127) {
             transpose = transpose - 256;
           }
-          if (phrase == "255") {
+          if (phrase === 255) {
             phrase = "--";
           }
-          outputHTML += `<div class="dr2">\n`;
-          outputHTML += `<div class="dc4">↳${String("0" + phrase.toString(16))
+          outputHTML += `<div class="dr2">`;
+          outputHTML += `<div class="dc4">${String("0" + phrase.toString(16))
             .toUpperCase()
-            .slice(-2)}</div>\n`;
-          outputHTML += `<div class="dc">\n`;
+            .slice(-2)}</div>`;
+          outputHTML += `<div class="dc">`;
           for (let l = 0; l < 16; l++) {
-            // outputHTML += `<div class="dr">\n`;
-            if (phrase != "--") {
-              // outputHTML += `<div class="dc">${String('0'+l.toString(16)).toUpperCase().slice(-2)}</div>`;
+            if (phrase !== "--") {
               outputHTML += `${l.toString(16).toUpperCase()}|`;
               let note = data.phrases.notes[phrase][l];
-              if (note != 0) {
+              if (note !== 0) {
                 if (note + transpose <= 0) {
                   note = TRANSPOSE[(((note + transpose) % 12) + 12) % 12];
                 } else {
@@ -569,14 +337,11 @@ exports.makeHTML = function(data) {
               } else {
                 note = NOTES[0];
               }
-              // outputHTML += `<div class="dc">${note}</div>`;
               outputHTML += `${note}|`;
               let instrument = data.phrases.instruments[phrase][l];
-              if (instrument == 255) {
+              if (instrument === 255) {
                 instrument = "--";
               }
-              // outputHTML += `<div class="dc">${'I'+String('0'+instrument.toString(16)).toUpperCase().slice(-2)}</div>`;
-              // outputHTML += `<div class="dc2">${EFFECTS[data.phrases.fx[phrase][l]]+String('0'+data.phrases.fxval[phrase][l].toString(16)).toUpperCase().slice(-2)}</div>`;
               outputHTML += `${"I" +
                 String("0" + instrument.toString(16))
                   .toUpperCase()
@@ -586,9 +351,7 @@ exports.makeHTML = function(data) {
                 String("0" + data.phrases.fxval[phrase][l].toString(16))
                   .toUpperCase()
                   .slice(-2)}<br>`;
-              // outputHTML += `<div class="dc">${String('0'+data.phrases.fxval[phrase][l].toString(16)).toUpperCase().slice(-2)}</div>`;
             }
-            // outputHTML += `</div>`;
           }
           outputHTML += `</div></div>`;
         }
@@ -598,7 +361,12 @@ exports.makeHTML = function(data) {
     outputHTML += `</div>\n`;
   }
   outputHTML += `</tbody></table>`;
-  outputHTML += `<script type="text/javascript" src="expander.js"></script>`;
+  outputHTML += `<script type="text/javascript">
+        function expand(id) {
+            var e = document.getElementById(id);
+            e.style.visibility = e.style.visibility === 'collapse' ? 'visible' : 'collapse';
+        }
+</script>`;
   outputHTML += `</body></html>`;
   return outputHTML;
 };
@@ -606,7 +374,7 @@ exports.makeHTML = function(data) {
 function deltaTime(time) {
   let vlq = time & 0x7f;
   let outBytes = [];
-  if (time == 0) {
+  if (time === 0) {
     return [0];
   }
   while (time > 0) {
@@ -630,9 +398,9 @@ function findCommandInTable(data, ins, com) {
   let table = data.instruments.params[ins][6] - 32;
   if (table >= 0) {
     for (let i = 0; i < 16; i++) {
-      if (data.tables.fx[table][i] == com) {
+      if (data.tables.fx[table][i] === com) {
         return i + data.tables.fxval[table][i];
-      } else if (data.tables.fx2[table][i] == com) {
+      } else if (data.tables.fx2[table][i] === com) {
         return i + data.tables.fx2val[table][i];
       }
     }
@@ -687,18 +455,18 @@ function processTempoMetaTrack(metaEventList, tempoAdjust) {
   }
   return trackOutput;
 }
-exports.makeMIDI = function(data) {
+export const makeMIDI = function(data) {
   const EFFECTS = getVersionEffects(data);
   let grooveSum = 0;
   let grooveLength = 16;
   for (let i = 0; i < 16; i++) {
     grooveSum += data.grooves[0][i];
-    if (data.grooves[0][i] == 0) {
+    if (data.grooves[0][i] === 0) {
       grooveLength = i;
       break;
     }
   }
-  let ticksPerQuarter = toBytes(((grooveSum * 1.0) / grooveLength) * 80, 2);
+  let ticksPerQuarter = toBytes(((grooveSum) / grooveLength) * 80, 2);
   let adjustedTempo = (data.tempo * grooveLength * 6.0) / grooveSum;
   let midiTempo = Math.round((1 / (adjustedTempo / 60.0)) * 1000000);
   let tracks = [];
@@ -770,7 +538,7 @@ exports.makeMIDI = function(data) {
     let hopsLeft = 0;
     for (let i = 0; i < 254; i++) {
       let currChain = data.songchains[currChan][i];
-      if (currChain != 255) {
+      if (currChain !== 255) {
         console.log("-- Processing chain " + currChain.toString(16));
         // loop through phrases
         for (let j = 0; j < 16; j++) {
@@ -779,12 +547,12 @@ exports.makeMIDI = function(data) {
           if (transpose > 127) {
             transpose = transpose - 256;
           }
-          if (currPhrase != 255) {
+          if (currPhrase !== 255) {
             console.log("---- Processing phrase " + currPhrase.toString(16));
             // loop through notes and create events for all note starts
             for (let k = 0; k < 16; k++) {
               console.log("------ Processing note row " + k.toString(16));
-              if (EFFECTS[data.phrases.fx[currPhrase][k]] == "H") {
+              if (EFFECTS[data.phrases.fx[currPhrase][k]] === "H") {
                 if (data.phrases.fxval[currPhrase][k] < 0x10) {
                   startOffset = data.phrases.fxval[currPhrase][k];
                   k += 16;
@@ -795,26 +563,26 @@ exports.makeMIDI = function(data) {
                   k += 16;
                 }
               } else {
-                if (EFFECTS[data.phrases.fx[currPhrase][k]] == "T") {
+                if (EFFECTS[data.phrases.fx[currPhrase][k]] === "T") {
                   metaEventList.push({
                     time: lastEventTime,
                     type: "Tempo",
                     val: data.phrases.fxval[currPhrase][k]
                   });
                 }
-                if (EFFECTS[data.phrases.fx[currPhrase][k]] == "G") {
+                if (EFFECTS[data.phrases.fx[currPhrase][k]] === "G") {
                   groove = data.phrases.fxval[currPhrase][k];
                   grooveStep = 0;
                 }
-                if (data.grooves[groove][grooveStep] == 0 || grooveStep > 15) {
+                if (data.grooves[groove][grooveStep] === 0 || grooveStep > 15) {
                   grooveStep = 0;
                 }
                 currNote = data.phrases.notes[currPhrase][k];
-                if (currNote != 0) {
-                  if (data.phrases.instruments[currPhrase][k] != 255) {
+                if (currNote !== 0) {
+                  if (data.phrases.instruments[currPhrase][k] !== 255) {
                     currInstrument = data.phrases.instruments[currPhrase][k];
                   }
-                  if (currInstrument == 0x40 || data.instruments.params[currInstrument][5] & 32) {
+                  if (currInstrument === 0x40 || (data.instruments.params[currInstrument][5] & 32) !== 0) {
                     if (currNote + MIDIOFFSET < 128) {
                       currNote += MIDIOFFSET;
                     }
@@ -823,7 +591,7 @@ exports.makeMIDI = function(data) {
                       currNote += MIDIOFFSET + transpose;
                     }
                   }
-                  if (EFFECTS[data.phrases.fx[currPhrase][k]] == "D") {
+                  if (EFFECTS[data.phrases.fx[currPhrase][k]] === "D") {
                     delayTime = 20 * data.phrases.fxval[currPhrase][k];
                   } else {
                     delayTime = 0;
@@ -841,17 +609,7 @@ exports.makeMIDI = function(data) {
                   eventList[channel].push(currEvent);
                   lastEvent = eventList[channel][eventList[channel].length - 1];
                 }
-                //if (EFFECTS[data.phrases.fx[currPhrase][k]] == "K") {
-                //  eventList[channel][
-                //    eventList[channel].length - 1
-                  //this code is wrong. i just changed it to 'max' because i needed to not generate notes of 0 length
-                  //].kill = Math.max(
-                //  ].kill = Math.min(
-                //    data.phrases.fxval[currPhrase][k] * 20,
-                //    lastEvent.kill
-                //  );
-                //}
-                if (EFFECTS[data.phrases.fx[currPhrase][k]] == "K") {
+                if (EFFECTS[data.phrases.fx[currPhrase][k]] === "K") {
   let noteStartTime = eventList[channel][eventList[channel].length - 1].time;
   let baseDuration = lastEventTime - noteStartTime;
 
@@ -911,7 +669,7 @@ exports.makeMIDI = function(data) {
       lastEvent = currEvent;
     }
     // push last note kill
-    if (currEvent != undefined) {
+    if (currEvent !== undefined) {
     tracks[channel].push(
       ...[
         ...deltaTime(Math.min(currEvent.kill, 120)),
@@ -934,11 +692,15 @@ exports.makeMIDI = function(data) {
   metaTrack.push(...[0x00, 0xff, 0x2f, 0x00]);
   metaTrack.unshift(...toBytes(metaTrack.length, 4));
   metaTrack.unshift(...mTrk);
-  let midiOutput = Uint8Array.from(mThd.concat(...metaTrack, ...tracks));
-  return midiOutput;
+  return Uint8Array.from(mThd.concat(...metaTrack, ...tracks));
 };
 
-function getVersionEffects(data) {
+/**
+ *
+ * @param {LSDJSngFile} data
+ * @returns {string[]}
+ */
+const getVersionEffects = (data) => {
   let output = ["-", "A"];
   if (data.version > 7) {
     output.push("B");
