@@ -1,0 +1,21 @@
+name: Deploy to Surge
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install pacakages
+        run: npm install
+      - name: rollup
+        run: npx rollup src/main.js > main.out.js
+      - name: Install Surge
+        run: npm install -g surge
+      - name: Deploy to Surge
+        run: surge .
+        env:
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
