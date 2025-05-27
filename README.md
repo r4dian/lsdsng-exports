@@ -1,14 +1,16 @@
-LSDSNG to HTML/JSON/MIDI
-=================
-By AdamGetsAwesome
-------------------
+# LSDSNG to HTML/JSON/MIDI
+## By AdamGetsAwesome
 
 An app to export your .lsdsng data:
 - in HTML with all 4 channels side by side
 - As JSON
 - As a MIDI file
 
+## Try online
 
+Automatiacally deploys [here](https://lsdsng.surge.sh/)
+
+## PRs welcome.
 
 ## Usage
 1. Click "choose file" and select a .lsdsng file
@@ -28,4 +30,6 @@ An app to export your .lsdsng data:
   
 Get LSDManager to extract individual lsdsng song files from .sav: [https://github.com/jkotlinski/lsdmanager/releases/](https://github.com/jkotlinski/lsdmanager/releases/)
 
-If you end up using this, say hi on [Twitter](https://twitter.com/adamgetsawesome)
+~~If you end up using this, say hi on [Twitter](https://twitter.com/adamgetsawesome).~~
+The author's not on Twitter, no one is. 
+The host of this instance is on [Masto](https://social.sdfeu.org/@radian)/[Bluesky](https://bsky.app/profile/r4dian.bsky.social)
